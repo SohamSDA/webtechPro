@@ -1,18 +1,14 @@
 import { motion } from "motion/react";
 import { WorldMap } from "./ui/world-map.jsx";
-import { Button } from "./ui/button.jsx";
-import { useNavigate } from "react-router-dom";
 
 export function WorldMapDemo() {
   return (
-    <div className="py-12 bg-zinc-900 w-full relative">
-      {/* Logout Button - Top Right Corner */}
-
-      <div className="max-w-7xl mx-auto text-center">
-        <p className="font-bold text-xl md:text-4xl text-white">
+    <div className="relative w-full bg-transparent py-12">
+      <div className="mx-auto max-w-7xl px-4 text-center">
+        <p className="text-xl font-bold text-zinc-100 md:text-4xl">
           Skip{" "}
-          <span className="text-neutral-400">
-            {" the Setup".split("").map((letter, idx) => (
+          <span className="text-zinc-400">
+            {"the setup".split("").map((letter, idx) => (
               <motion.span
                 key={idx}
                 className="inline-block"
@@ -26,17 +22,18 @@ export function WorldMapDemo() {
           </span>
         </p>
 
-        <div className="flex gap-4 justify-center mr-10">
-          <p className="text-sm md:text-lg text-neutral-500 max-w-2xl py-4">
-            Skip the setup, start coding together instantly.
-            Create rooms and collaborate in one click. Whether you're building with teammates, teaching a friend, or pair programming, it’s all seamless and in-sync.
+        <div className="flex justify-center">
+          <p className="max-w-2xl py-4 text-sm leading-relaxed text-zinc-400 md:text-lg">
+            Skip setup and start coding together instantly. Create rooms and
+            collaborate in one click, whether you are building with teammates,
+            teaching a friend, or pair programming.
           </p>
         </div>
       </div>
 
-      <div>
-
+      <div className="mx-auto max-w-7xl rounded-3xl border border-zinc-900 bg-zinc-950/70 p-4 shadow-[0_26px_70px_-45px_rgba(0,0,0,0.98)]">
         <WorldMap
+          lineColor="#a1a1aa"
           dots={[
             {
               start: { lat: 64.2008, lng: -149.4937 },

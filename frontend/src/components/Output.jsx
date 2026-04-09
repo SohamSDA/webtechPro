@@ -15,36 +15,39 @@ export const OutputConsole = ({ code, language }) => {
 
       const data = await response.json();
       setOutput(data.output);
-    } catch (error) {
-      setOutput("Error connecting to server!");
+    } catch {
+      setOutput("Error connecting to server");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-[#1A1A1A] border border-[#1E90FF]/30 rounded-xl p-4 text-[#FFFFFF] mx-1 shadow-lg">
-      <div className="flex gap-6 justify-between items-center">
-        <h2 className="text-lg font-bold tracking-wide bg-gradient-to-r from-[#00FF85] to-[#1E90FF] bg-clip-text text-transparent">
+    <div className="h-full rounded-2xl border border-zinc-900 bg-zinc-950/95 p-4 shadow-[0_20px_45px_-35px_rgba(0,0,0,0.98)]">
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-base font-semibold tracking-tight text-zinc-100 md:text-lg">
           Output Console
         </h2>
         <button
-          className={`px-6 py-2 rounded-lg font-bold transition-all duration-300 ${
-            loading 
-              ? "bg-[#0D0D0D] text-[#FFFFFF]/40 cursor-not-allowed" 
-              : "bg-gradient-to-r from-[#00FF85] to-[#1E90FF] text-[#0D0D0D] hover:from-[#00FF85]/90 hover:to-[#1E90FF]/90 hover:shadow-lg hover:shadow-[#00FF85]/25 transform hover:-translate-y-0.5"
+          className={`rounded-lg px-5 py-2 text-sm font-semibold transition-colors duration-200 ${
+            loading
+              ? "cursor-not-allowed bg-zinc-900 text-zinc-600"
+              : "bg-white text-black hover:bg-zinc-200"
           }`}
           onClick={runCode}
           disabled={loading}
         >
-          {loading ? "Running..." : "▶ Run Code"}
+          {loading ? "Running..." : "Run Code"}
         </button>
       </div>
-      <div className="h-36 overflow-y-auto bg-[#0D0D0D] p-4 rounded-lg border border-[#1E90FF]/20 mt-4 font-mono text-sm">
+
+      <div className="mt-4 h-[145px] overflow-y-auto rounded-xl border border-zinc-900 bg-black p-3 font-mono text-sm text-zinc-200 md:h-[160px]">
         {output ? (
-          <pre className="text-[#00FF85]">{output}</pre>
+          <pre className="whitespace-pre-wrap break-words">{output}</pre>
         ) : (
-          <p className="text-[#FFFFFF]/40">No output yet... Run your code to see results.</p>
+          <p className="text-zinc-500">
+            No output yet. Run your code to see results.
+          </p>
         )}
       </div>
     </div>

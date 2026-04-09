@@ -46,7 +46,7 @@ export const initSocket = (server) => {
     const record = await RoomPresence.findOneAndUpdate(
       { roomId, userId },
       {
-        $setOnInsert: { username, totalTimeMs: 0, sessionsCount: 0 },
+        $setOnInsert: { totalTimeMs: 0, sessionsCount: 0 },
         $set: { username, lastJoinedAt: new Date() },
       },
       { new: true, upsert: true },
@@ -60,7 +60,12 @@ export const initSocket = (server) => {
     });
   };
 
-  const finalizeSession = async ({ roomId, userId, username, sessionStartedAt }) => {
+  const finalizeSession = async ({
+    roomId,
+    userId,
+    username,
+    sessionStartedAt,
+  }) => {
     if (!sessionStartedAt) return;
 
     const durationMs = Math.max(Date.now() - sessionStartedAt, 0);
@@ -125,7 +130,10 @@ export const initSocket = (server) => {
 
   const emitRoomActivity = async (roomId) => {
     const activity = await buildRoomActivity(roomId);
-    io.to(roomId).emit("roomActivityUpdate", activity);
+    io.to(roomId).emit("roomActivityUpdate", {
+      generatedAt: Date.now(),
+      activity,
+    });
   };
 
   setInterval(() => {

@@ -18,6 +18,10 @@ export const CodeEditor = () => {
   const [activeFileViewers, setActiveFileViewers] = useState({});
   const [typingUsers, setTypingUsers] = useState([]);
   const [roomActivity, setRoomActivity] = useState([]);
+  const roomActivitySnapshotRef = useRef({
+    generatedAt: Date.now(),
+    activity: [],
+  });
 
   const activeFileRef = useRef(activeFile);
   const messagesEndRef = useRef(null);
@@ -35,6 +39,30 @@ export const CodeEditor = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const syncLiveRoomActivity = () => {
+    const snapshot = roomActivitySnapshotRef.current;
+    const elapsedMs = Math.max(Date.now() - snapshot.generatedAt, 0);
+
+    setRoomActivity(
+      (snapshot.activity || []).map((item) => {
+        if (!item?.isActive) {
+          return item;
+        }
+
+        return {
+          ...item,
+          activeSessionMs: (item.activeSessionMs || 0) + elapsedMs,
+          totalTimeMs: (item.totalTimeMs || 0) + elapsedMs,
+        };
+      }),
+    );
+  };
+
+  useEffect(() => {
+    const intervalId = setInterval(syncLiveRoomActivity, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   // Emit file switch event when activeFile changes
   useEffect(() => {
@@ -129,7 +157,19 @@ export const CodeEditor = () => {
     });
 
     socket.on("roomActivityUpdate", (activity) => {
-      setRoomActivity(Array.isArray(activity) ? activity : []);
+      if (Array.isArray(activity)) {
+        roomActivitySnapshotRef.current = {
+          generatedAt: Date.now(),
+          activity,
+        };
+      } else {
+        roomActivitySnapshotRef.current = {
+          generatedAt: activity?.generatedAt || Date.now(),
+          activity: Array.isArray(activity?.activity) ? activity.activity : [],
+        };
+      }
+
+      syncLiveRoomActivity();
     });
 
     return () => {
@@ -223,8 +263,7 @@ export const CodeEditor = () => {
   );
 
   return (
-    <div className="flex h-screen bg-zinc-900 overflow-hidden">
-      {/* Sidebar */}
+    <div className="flex min-h-screen flex-col bg-black text-zinc-100 lg:h-screen lg:flex-row">
       <Sidebar
         roomId={roomId}
         setCode={setCode}
@@ -238,9 +277,8 @@ export const CodeEditor = () => {
         roomActivity={roomActivity}
       />
 
-      {/* Code Editor + Output Section */}
-      <div className="flex flex-col flex-1 min-w-0">
-        <div className="flex-1 h-64 overflow-auto">
+      <div className="flex min-h-[520px] flex-1 flex-col gap-3 bg-black p-3 lg:min-h-0 lg:p-4">
+        <div className="min-h-[380px] flex-1 overflow-hidden">
           <Code
             code={code}
             setCode={handleCodeChange}
@@ -249,46 +287,45 @@ export const CodeEditor = () => {
           />
         </div>
 
-        <div className="h-64 p-3">
+        <div className="h-[230px] lg:h-[250px]">
           <OutputConsole code={code} language={language} />
         </div>
       </div>
 
-      {/* Chat Box */}
-      <div className="w-80 border-l border-[#1E90FF]/30 bg-[#1A1A1A] flex flex-col shadow-lg">
-        <div className="p-4 border-b border-[#1E90FF]/30 bg-[#1A1A1A]">
-          <h2 className="text-xl font-bold bg-gradient-to-r from-[#00FF85] to-[#1E90FF] bg-clip-text text-transparent tracking-wide">
-            💬 Chat
+      <div className="flex h-[320px] w-full flex-col border-t border-zinc-900 bg-zinc-950/95 shadow-[0_20px_45px_-35px_rgba(0,0,0,0.98)] lg:h-auto lg:w-96 lg:border-l lg:border-t-0">
+        <div className="border-b border-zinc-900 px-4 py-4">
+          <h2 className="text-lg font-semibold tracking-tight text-zinc-100">
+            Team Chat
           </h2>
-          <p className="text-xs text-[#FFFFFF]/50 mt-1">
+          <p className="mt-1 text-xs text-zinc-500">
             {messages.length} message{messages.length !== 1 ? "s" : ""}
           </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-[#0D0D0D] p-4 space-y-3">
+        <div className="flex-1 space-y-3 overflow-y-auto bg-black p-4">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
-              <p className="text-[#FFFFFF]/40 text-sm text-center">
+              <p className="text-center text-sm text-zinc-500">
                 No messages yet...
                 <br />
-                Start the conversation! 💭
+                Start the conversation.
               </p>
             </div>
           ) : (
             messages.map((msg, index) => (
               <div key={index} className="animate-fadeIn">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-[#00FF85] font-semibold text-sm">
+                  <span className="text-sm font-semibold text-zinc-200">
                     {msg.username}
                   </span>
-                  <span className="text-[#FFFFFF]/30 text-xs">
+                  <span className="text-xs text-zinc-500">
                     {new Date(msg.timestamp).toLocaleTimeString("en-US", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
                   </span>
                 </div>
-                <p className="text-[#FFFFFF]/90 text-sm mt-1 break-words">
+                <p className="mt-1 break-words rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200">
                   {msg.message}
                 </p>
               </div>
@@ -298,8 +335,8 @@ export const CodeEditor = () => {
         </div>
 
         {otherTypingUsers.length > 0 && (
-          <div className="px-4 py-2 border-t border-[#1E90FF]/20 bg-[#0D0D0D]">
-            <p className="text-xs text-[#00FF85] animate-pulse">
+          <div className="border-t border-zinc-900 bg-black px-4 py-2">
+            <p className="animate-pulse text-xs text-zinc-300">
               {otherTypingUsers.length === 1
                 ? `${otherTypingUsers[0]} is typing...`
                 : `${otherTypingUsers.join(", ")} are typing...`}
@@ -307,23 +344,22 @@ export const CodeEditor = () => {
           </div>
         )}
 
-        {/* Chat Input */}
-        <div className="p-3 border-t border-[#1E90FF]/30 bg-[#1A1A1A]">
+        <div className="border-t border-zinc-900 bg-zinc-950/95 p-3">
           <div className="flex gap-2">
             <input
               type="text"
-              className="flex-1 px-3 py-2 rounded-lg bg-[#0D0D0D] border border-[#1E90FF]/50 text-[#FFFFFF] placeholder-[#FFFFFF]/40 focus:outline-none focus:ring-2 focus:ring-[#00FF85] focus:border-[#00FF85] transition-all duration-300 text-sm"
+              className="flex-1 rounded-lg border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-500 transition-all duration-200 focus:border-zinc-400 focus:outline-none focus:ring-4 focus:ring-zinc-600/20"
               placeholder={user ? "Type a message..." : "Loading..."}
               value={message}
               onChange={handleMessageChange}
-              onKeyPress={(e) => e.key === "Enter" && handleSendButton()}
+              onKeyDown={(e) => e.key === "Enter" && handleSendButton()}
               disabled={!user}
             />
             <button
-              className={`px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 ${
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-all duration-200 ${
                 !user || !message.trim()
-                  ? "bg-[#0D0D0D] text-[#FFFFFF]/30 cursor-not-allowed"
-                  : "bg-gradient-to-r from-[#00FF85] to-[#1E90FF] text-[#0D0D0D] hover:from-[#00FF85]/90 hover:to-[#1E90FF]/90 hover:shadow-lg hover:shadow-[#00FF85]/25 transform hover:-translate-y-0.5"
+                  ? "cursor-not-allowed bg-zinc-900 text-zinc-600"
+                  : "bg-white text-black hover:bg-zinc-200"
               }`}
               onClick={handleSendButton}
               disabled={!user || !message.trim()}

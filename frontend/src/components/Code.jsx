@@ -1,12 +1,20 @@
 import Editor from "@monaco-editor/react";
+import { Sparkles } from "lucide-react";
+import { toast } from "react-toastify";
 
-
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 export const Code = ({ code, setCode, language, setLanguage, filename }) => {
   const handleGeminiSuggestion = async () => {
+    if (!GEMINI_API_KEY) {
+      toast.error(
+        "Gemini key is missing. Set VITE_GEMINI_API_KEY in frontend env.",
+      );
+      return;
+    }
+
     const prompt = `Only return JavaScript code. Do not include explanations. Complete this code:\n\n${code}\n`;
 
-    console.log("Prompt sent to Gemini:", prompt);
     try {
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${GEMINI_API_KEY}`,
@@ -22,32 +30,35 @@ export const Code = ({ code, setCode, language, setLanguage, filename }) => {
               },
             ],
           }),
-        }
+        },
       );
 
       const data = await res.json();
       const suggestion = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-      const cleaned = suggestion.replace(/```[\s\S]*?```/g, match => {
-        return match.replace(/```[a-z]*\n?/gi, "").replace(/```$/, "");
-      }).trim();
+      const cleaned = suggestion
+        .replace(/```[a-z]*\n?/gi, "")
+        .replace(/```/g, "")
+        .trim();
 
       if (cleaned) {
         setCode(cleaned);
       }
     } catch (err) {
       console.error("Gemini suggestion error:", err);
+      toast.error("Failed to fetch AI suggestion");
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-[#1A1A1A] text-[#FFFFFF] p-4">
-      {/* Language Selector */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-4">
-          <label className="text-sm font-semibold tracking-wide text-[#FFFFFF]/80">LANGUAGE:</label>
+    <div className="flex h-full flex-col rounded-2xl border border-zinc-900 bg-zinc-950/95 p-4 shadow-[0_20px_45px_-35px_rgba(0,0,0,0.98)]">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <label className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-400">
+            Language
+          </label>
           <select
-            className="bg-[#0D0D0D] text-[#FFFFFF] border border-[#1E90FF]/50 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#00FF85] transition-all duration-300"
+            className="rounded-lg border border-zinc-800 bg-black px-3 py-2 text-sm text-zinc-200 transition-all duration-200 focus:border-zinc-400 focus:outline-none focus:ring-4 focus:ring-zinc-600/20"
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
           >
@@ -60,22 +71,23 @@ export const Code = ({ code, setCode, language, setLanguage, filename }) => {
 
         <button
           onClick={handleGeminiSuggestion}
-          className="px-6 py-2 rounded-lg bg-gradient-to-r from-[#FF0099] to-[#1E90FF] text-[#FFFFFF] font-bold hover:from-[#FF0099]/90 hover:to-[#1E90FF]/90 hover:shadow-lg hover:shadow-[#FF0099]/25 transform hover:-translate-y-0.5 transition-all duration-300"
+          className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-black px-4 py-2 text-sm font-semibold text-zinc-200 transition-colors duration-200 hover:bg-zinc-900"
         >
-          ✨ AI Suggestion
+          <Sparkles className="h-4 w-4" />
+          AI Suggestion
         </button>
       </div>
 
-      {/* Filename Display */}
       {filename && (
-        <p className="text-sm text-[#FFFFFF]/60 mb-2 px-2">📂 Editing: <span className="text-[#00FF85]">{filename}</span></p>
+        <p className="mb-3 text-sm text-zinc-400">
+          Editing: <span className="font-medium text-zinc-200">{filename}</span>
+        </p>
       )}
 
-      {/* Code Editor */}
-      <div className="flex-1 border border-[#1E90FF]/30 rounded-xl overflow-hidden shadow-lg">
+      <div className="flex-1 overflow-hidden rounded-xl border border-zinc-900 bg-black">
         <Editor
-          height="67vh"
-          theme="vs-dark"
+          height="100%"
+          theme="hc-black"
           language={language}
           value={code}
           onChange={setCode}
