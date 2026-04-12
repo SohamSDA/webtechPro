@@ -263,7 +263,7 @@ export const Sidebar = ({
   };
 
   return (
-    <div className="w-full shrink-0 border-b border-zinc-900 bg-zinc-950/95 p-4 shadow-[0_18px_45px_-35px_rgba(0,0,0,0.98)] lg:h-screen lg:w-80 lg:border-b-0 lg:border-r lg:overflow-y-auto">
+    <div className="relative z-10 w-full shrink-0 border-b border-zinc-800/70 bg-zinc-900/70 p-4 shadow-[0_18px_45px_-35px_rgba(0,0,0,0.94)] backdrop-blur-md lg:h-screen lg:w-80 lg:border-b-0 lg:border-r lg:overflow-y-auto">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight text-zinc-100">
@@ -276,7 +276,7 @@ export const Sidebar = ({
 
         <button
           type="button"
-          className="inline-flex items-center gap-1 rounded-lg border border-zinc-800 bg-black px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-zinc-900"
+          className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900/85 px-3 py-1.5 text-xs font-medium text-zinc-200 transition-colors hover:bg-zinc-800/90"
           onClick={() => navigate("/joinroom")}
         >
           <LogOut className="h-3.5 w-3.5" />
@@ -285,7 +285,7 @@ export const Sidebar = ({
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2">
-        <label className="flex cursor-pointer items-center justify-center rounded-lg border border-zinc-800 bg-black py-2 text-zinc-200 transition-colors hover:bg-zinc-900">
+        <label className="flex cursor-pointer items-center justify-center rounded-lg border border-zinc-700 bg-zinc-900/80 py-2 text-zinc-100 transition-colors hover:bg-zinc-800/90">
           <FaUpload size={13} />
           <input
             type="file"
@@ -297,7 +297,7 @@ export const Sidebar = ({
 
         <button
           type="button"
-          className="flex items-center justify-center rounded-lg border border-zinc-800 bg-black py-2 text-zinc-200 transition-colors hover:bg-zinc-900"
+          className="flex items-center justify-center rounded-lg border border-zinc-700 bg-zinc-900/80 py-2 text-zinc-100 transition-colors hover:bg-zinc-800/90"
           onClick={handleDownload}
         >
           <FaDownload size={13} />
@@ -307,13 +307,13 @@ export const Sidebar = ({
           <DialogTrigger asChild>
             <button
               type="button"
-              className="flex items-center justify-center rounded-lg border border-zinc-800 bg-black py-2 text-zinc-200 transition-colors hover:bg-zinc-900"
+              className="flex items-center justify-center rounded-lg border border-zinc-700 bg-zinc-900/80 py-2 text-zinc-100 transition-colors hover:bg-zinc-800/90"
             >
               <IoIosCreate size={16} />
             </button>
           </DialogTrigger>
 
-          <DialogContent className="sm:max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 text-zinc-100">
+          <DialogContent className="sm:max-w-md rounded-2xl border border-zinc-700 bg-zinc-900/95 text-zinc-100">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold text-zinc-100">
                 Create New File
@@ -321,7 +321,7 @@ export const Sidebar = ({
             </DialogHeader>
 
             <Input
-              className="mt-1 h-11 rounded-xl border-zinc-800 bg-black text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-zinc-600/20"
+              className="mt-1 h-11 rounded-xl border-zinc-700 bg-zinc-900/85 text-sm text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-zinc-500/20"
               placeholder="Enter file name (e.g. main.js)"
               value={newFilename}
               onChange={(e) => setNewFilename(e.target.value)}
@@ -361,8 +361,8 @@ export const Sidebar = ({
                     type="button"
                     className={`flex-1 truncate rounded-lg border px-3 py-2 text-left text-sm transition-all duration-200 ${
                       activeFile === file._id
-                        ? "border-zinc-300 bg-zinc-900 text-zinc-100"
-                        : "border-zinc-900 bg-black text-zinc-200 hover:border-zinc-800 hover:bg-zinc-950"
+                        ? "border-zinc-300 bg-zinc-800/85 text-zinc-100"
+                        : "border-zinc-700/80 bg-zinc-900/75 text-zinc-200 hover:border-zinc-600 hover:bg-zinc-800/80"
                     }`}
                     onClick={() => handleFileClick(file)}
                   >
@@ -385,7 +385,7 @@ export const Sidebar = ({
                       {otherViewers.slice(0, 3).map((viewer, idx) => (
                         <div
                           key={`${viewer}-${idx}`}
-                          className="flex h-6 w-6 items-center justify-center rounded-full border border-zinc-900 bg-zinc-800 text-[10px] font-semibold text-zinc-200"
+                          className="flex h-6 w-6 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800/90 text-[10px] font-semibold text-zinc-200"
                           title={viewer}
                         >
                           {viewer.charAt(0).toUpperCase()}
@@ -411,7 +411,7 @@ export const Sidebar = ({
         </div>
       </div>
 
-      <div className="mt-4 rounded-xl border border-zinc-900 bg-black p-3">
+      <div className="mt-4 rounded-xl border border-zinc-800/70 bg-zinc-900/80 p-3">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-400">
@@ -422,7 +422,7 @@ export const Sidebar = ({
           <button
             type="button"
             onClick={handleCopyRoomId}
-            className="inline-flex items-center gap-1 rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 text-xs text-zinc-300 transition-colors hover:bg-zinc-900"
+            className="inline-flex items-center gap-1 rounded-md border border-zinc-700 bg-zinc-900/80 px-2 py-1 text-xs text-zinc-300 transition-colors hover:bg-zinc-800"
           >
             <Copy className="h-3.5 w-3.5" />
             Copy
@@ -440,7 +440,7 @@ export const Sidebar = ({
             {collaboratorRows.map((member, index) => (
               <div
                 key={`${member.name}-${index}`}
-                className="rounded-xl border border-zinc-900 bg-black px-3 py-2"
+                className="rounded-xl border border-zinc-800/70 bg-zinc-900/80 px-3 py-2"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -456,8 +456,8 @@ export const Sidebar = ({
                   <span
                     className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
                       member.isActive
-                        ? "bg-zinc-500/20 text-zinc-200"
-                        : "bg-zinc-900 text-zinc-500"
+                        ? "bg-zinc-400/20 text-zinc-100"
+                        : "bg-zinc-800/80 text-zinc-400"
                     }`}
                   >
                     {member.isActive ? "active" : "offline"}
