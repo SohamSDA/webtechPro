@@ -1,20 +1,19 @@
 import { Server } from "socket.io";
 import { Message } from "../modules/Message.js"; // Import Message model
 import RoomPresence from "../modules/RoomPresence.js";
+import { isAllowedOrigin } from "../utils/corsOrigins.js";
 
 export const initSocket = (server) => {
-  const allowedOrigins = (
-    process.env.CLIENT_URLS ||
-    process.env.CLIENT_URL ||
-    "http://localhost:5173"
-  )
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-
   const io = new Server(server, {
     cors: {
-      origin: allowedOrigins,
+      origin: (origin, callback) => {
+        if (isAllowedOrigin(origin)) {
+          callback(null, true);
+          return;
+        }
+
+        callback(new Error("Not allowed by CORS"));
+      },
       methods: ["GET", "POST", "PUT"],
       credentials: true,
     },

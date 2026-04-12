@@ -7,6 +7,7 @@ import { authRoutes } from "./routes/auth.routes.js";
 import { codeRoutes } from "./routes/code.routes.js";
 import { roomRoutes } from "./routes/room.routes.js";
 import { initSocket } from "./socket/socketIO.js";
+import { getAllowedOriginsText, isAllowedOrigin } from "./utils/corsOrigins.js";
 
 dotenv.config();
 connectDB();
@@ -16,22 +17,16 @@ const server = createServer(app);
 
 app.use(express.json());
 
-const allowedOrigins = (
-  process.env.CLIENT_URLS ||
-  process.env.CLIENT_URL ||
-  "http://localhost:5173"
-)
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean);
-
 const corsOption = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       callback(null, true);
       return;
     }
 
+    console.warn(
+      `Blocked CORS origin: ${origin}. Allowed origins: ${getAllowedOriginsText()}`,
+    );
     callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
