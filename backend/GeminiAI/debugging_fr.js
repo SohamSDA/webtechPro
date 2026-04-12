@@ -22,10 +22,10 @@ runBtn.addEventListener("click", async () => {
 
     // Send error + code to backend for AI explanation
     try {
-      const res = await fetch("http://localhost:3000/debug", {
+      const res = await fetch("/debug", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ errorMessage: error.message, code })
+        body: JSON.stringify({ errorMessage: error.message, code }),
       });
 
       const data = await res.json();

@@ -4,8 +4,9 @@ import io from "socket.io-client";
 import { Code } from "@/components/Code.jsx";
 import { OutputConsole } from "@/components/Output.jsx";
 import { Sidebar } from "@/components/Sidebar";
+import { SOCKET_URL, apiUrl } from "@/lib/api";
 
-const socket = io.connect("http://localhost:3000");
+const socket = io.connect(SOCKET_URL);
 
 export const CodeEditor = () => {
   const MIN_CHAT_WIDTH = 280;
@@ -31,7 +32,10 @@ export const CodeEditor = () => {
     typeof window !== "undefined" ? window.innerWidth >= 1024 : true,
   );
 
-  const roomActivitySnapshotRef = useRef({ generatedAt: Date.now(), activity: [] });
+  const roomActivitySnapshotRef = useRef({
+    generatedAt: Date.now(),
+    activity: [],
+  });
   const activeFileRef = useRef(activeFile);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -56,19 +60,31 @@ export const CodeEditor = () => {
     const handleMouseMove = (e) => {
       if (isResizingChatRef.current && mainAreaRef.current && isDesktop) {
         const bounds = mainAreaRef.current.getBoundingClientRect();
-        const dynamicMax = Math.max(MIN_CHAT_WIDTH, bounds.width - MIN_MAIN_WIDTH);
+        const dynamicMax = Math.max(
+          MIN_CHAT_WIDTH,
+          bounds.width - MIN_MAIN_WIDTH,
+        );
         const nextWidth = bounds.right - e.clientX;
         setChatWidth(
-          Math.min(Math.max(nextWidth, MIN_CHAT_WIDTH), Math.min(dynamicMax, MAX_CHAT_WIDTH))
+          Math.min(
+            Math.max(nextWidth, MIN_CHAT_WIDTH),
+            Math.min(dynamicMax, MAX_CHAT_WIDTH),
+          ),
         );
       }
 
       if (isResizingOutputRef.current && editorStackRef.current && isDesktop) {
         const bounds = editorStackRef.current.getBoundingClientRect();
-        const dynamicMax = Math.max(MIN_OUTPUT_HEIGHT, bounds.height - MIN_EDITOR_HEIGHT);
+        const dynamicMax = Math.max(
+          MIN_OUTPUT_HEIGHT,
+          bounds.height - MIN_EDITOR_HEIGHT,
+        );
         const nextHeight = bounds.bottom - e.clientY;
         setOutputHeight(
-          Math.min(Math.max(nextHeight, MIN_OUTPUT_HEIGHT), Math.min(dynamicMax, MAX_OUTPUT_HEIGHT))
+          Math.min(
+            Math.max(nextHeight, MIN_OUTPUT_HEIGHT),
+            Math.min(dynamicMax, MAX_OUTPUT_HEIGHT),
+          ),
         );
       }
     };
@@ -135,19 +151,29 @@ export const CodeEditor = () => {
 
   useEffect(() => {
     if (activeFile && user) {
-      socket.emit("switchFile", { roomId, fileId: activeFile, username: user.username });
+      socket.emit("switchFile", {
+        roomId,
+        fileId: activeFile,
+        username: user.username,
+      });
     }
   }, [activeFile, user, roomId]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem("token");
-      if (!token) { console.error("No token found"); return; }
+      if (!token) {
+        console.error("No token found");
+        return;
+      }
       try {
         const decoded = JSON.parse(atob(token.split(".")[1]));
         const userId = decoded.id;
-        if (!userId) { console.error("User ID not found in token"); return; }
-        const response = await fetch(`http://localhost:3000/auth/user/${userId}`, {
+        if (!userId) {
+          console.error("User ID not found in token");
+          return;
+        }
+        const response = await fetch(apiUrl(`/auth/user/${userId}`), {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!response.ok) throw new Error("Failed to fetch user data");
@@ -164,16 +190,26 @@ export const CodeEditor = () => {
   useEffect(() => {
     if (!user) return;
 
-    socket.emit("joinRoom", { roomId, username: user.username, userId: user.id });
+    socket.emit("joinRoom", {
+      roomId,
+      username: user.username,
+      userId: user.id,
+    });
 
     socket.on("previousMessages", (oldMessages) => setMessages(oldMessages));
-    socket.on("receivedmessage", (newMessage) => setMessages((prev) => [...prev, newMessage]));
+    socket.on("receivedmessage", (newMessage) =>
+      setMessages((prev) => [...prev, newMessage]),
+    );
     socket.on("changeCode", (newC, incomingFile) => {
       if (activeFileRef.current === incomingFile) setCode(newC);
     });
     socket.on("activeFileViewers", (viewers) => setActiveFileViewers(viewers));
-    socket.on("userJoined", (data) => console.log(`${data.username} joined the room`));
-    socket.on("userLeft", (data) => console.log(`${data.username} left the room`));
+    socket.on("userJoined", (data) =>
+      console.log(`${data.username} joined the room`),
+    );
+    socket.on("userLeft", (data) =>
+      console.log(`${data.username} left the room`),
+    );
     socket.on("typingUsersUpdate", (users) => setTypingUsers(users || []));
     socket.on("roomActivityUpdate", (activity) => {
       if (Array.isArray(activity)) {
@@ -201,15 +237,22 @@ export const CodeEditor = () => {
 
   const handleCodeChange = (newCode) => {
     setCode(newCode);
-    socket.emit("codeUpdate", { roomId, newCode, activeFile: activeFileRef.current });
+    socket.emit("codeUpdate", {
+      roomId,
+      newCode,
+      activeFile: activeFileRef.current,
+    });
     if (activeFileRef.current) {
-      fetch(`http://localhost:3000/api/rooms/file/update/${activeFileRef.current}`, {
+      fetch(apiUrl(`/api/rooms/file/update/${activeFileRef.current}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: newCode }),
       })
         .then((res) => res.json())
-        .then((data) => { if (!data.success) console.error("Error updating file:", data.message); })
+        .then((data) => {
+          if (!data.success)
+            console.error("Error updating file:", data.message);
+        })
         .catch((error) => console.error("Error updating file:", error));
     }
   };
@@ -248,7 +291,9 @@ export const CodeEditor = () => {
     };
   }, [roomId, user]);
 
-  const otherTypingUsers = typingUsers.filter((name) => name !== user?.username);
+  const otherTypingUsers = typingUsers.filter(
+    (name) => name !== user?.username,
+  );
 
   return (
     <div className="flex min-h-screen flex-col bg-black text-zinc-100 lg:h-screen lg:flex-row">
@@ -266,8 +311,10 @@ export const CodeEditor = () => {
       />
 
       {/* Main area: editor + output + chat */}
-      <div ref={mainAreaRef} className="flex min-h-0 flex-1 flex-col lg:flex-row lg:overflow-hidden">
-
+      <div
+        ref={mainAreaRef}
+        className="flex min-h-0 flex-1 flex-col lg:flex-row lg:overflow-hidden"
+      >
         {/* Editor + Output stacked vertically */}
         <div
           ref={editorStackRef}
@@ -296,7 +343,9 @@ export const CodeEditor = () => {
           {/* Output console - fixed height, resizable on desktop */}
           <div
             className="shrink-0"
-            style={isDesktop ? { height: `${outputHeight}px` } : { height: "230px" }}
+            style={
+              isDesktop ? { height: `${outputHeight}px` } : { height: "230px" }
+            }
           >
             <OutputConsole code={code} language={language} />
           </div>
@@ -315,10 +364,16 @@ export const CodeEditor = () => {
         {/* Chat panel - fixed width on desktop, resizable */}
         <div
           className="flex flex-col border-t border-zinc-900 bg-zinc-950/95 lg:border-l lg:border-t-0"
-          style={isDesktop ? { width: `${chatWidth}px`, minWidth: `${MIN_CHAT_WIDTH}px` } : { height: "320px" }}
+          style={
+            isDesktop
+              ? { width: `${chatWidth}px`, minWidth: `${MIN_CHAT_WIDTH}px` }
+              : { height: "320px" }
+          }
         >
           <div className="border-b border-zinc-900 px-4 py-4">
-            <h2 className="text-lg font-semibold tracking-tight text-zinc-100">Team Chat</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-zinc-100">
+              Team Chat
+            </h2>
             <p className="mt-1 text-xs text-zinc-500">
               {messages.length} message{messages.length !== 1 ? "s" : ""}
             </p>
@@ -337,7 +392,9 @@ export const CodeEditor = () => {
               messages.map((msg, index) => (
                 <div key={index} className="animate-fadeIn">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-sm font-semibold text-zinc-200">{msg.username}</span>
+                    <span className="text-sm font-semibold text-zinc-200">
+                      {msg.username}
+                    </span>
                     <span className="text-xs text-zinc-500">
                       {new Date(msg.timestamp).toLocaleTimeString("en-US", {
                         hour: "2-digit",

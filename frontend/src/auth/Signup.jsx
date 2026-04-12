@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { CheckCircle2, Sparkles, UserPlus } from "lucide-react";
 import { validateEmail } from "../../utils/helper.js";
 import { Navbar } from "@/components/Navbar";
+import { apiUrl } from "@/lib/api";
 
 export const Signup = () => {
   const [formData, setFormData] = useState({
@@ -41,7 +42,7 @@ export const Signup = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/auth/signup", {
+      const response = await fetch(apiUrl("/auth/signup"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

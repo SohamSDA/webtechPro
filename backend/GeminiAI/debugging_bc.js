@@ -27,11 +27,11 @@ ${code}
     const result = await model.generateContent(prompt);
     const explanation = result.response.text();
     res.json({ suggestion: explanation.trim() });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "AI debugging failed." });
   }
 });
 
-app.listen(3000, () => console.log("✅ Server running at http://localhost:3000"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

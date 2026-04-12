@@ -14,6 +14,7 @@ import {
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { useNavigate } from "react-router-dom";
+import { apiUrl } from "@/lib/api";
 
 export const Sidebar = ({
   roomId,
@@ -72,9 +73,7 @@ export const Sidebar = ({
   useEffect(() => {
     const fetchRoomDetails = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/rooms/get/${roomId}`,
-        );
+        const response = await fetch(apiUrl(`/api/rooms/get/${roomId}`));
         if (!response.ok) throw new Error("Failed to fetch room details");
 
         const data = await response.json();
@@ -91,9 +90,7 @@ export const Sidebar = ({
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:3000/api/rooms/file/get/${roomId}`,
-        );
+        const response = await fetch(apiUrl(`/api/rooms/file/get/${roomId}`));
         if (!response.ok) throw new Error("Failed to fetch files");
 
         const data = await response.json();
@@ -114,19 +111,16 @@ export const Sidebar = ({
     reader.onload = async (e) => {
       const fileContent = e.target?.result;
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/rooms/file/upload",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              filename: file.name,
-              content: fileContent,
-              owner: decodedUser?.id,
-              roomId,
-            }),
-          },
-        );
+        const response = await fetch(apiUrl("/api/rooms/file/upload"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filename: file.name,
+            content: fileContent,
+            owner: decodedUser?.id,
+            roomId,
+          }),
+        });
 
         const data = await response.json();
         if (!response.ok) {
@@ -149,7 +143,7 @@ export const Sidebar = ({
   const handleFileClick = async (file) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/rooms/file/specificFile/${file._id}`,
+        apiUrl(`/api/rooms/file/specificFile/${file._id}`),
       );
       const data = await response.json();
       if (!response.ok) throw new Error("Failed to fetch file");
@@ -194,19 +188,16 @@ export const Sidebar = ({
     }
 
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/rooms/file/create",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            filename: newFilename,
-            content: "",
-            owner: decodedUser?.id,
-            roomId,
-          }),
-        },
-      );
+      const response = await fetch(apiUrl("/api/rooms/file/create"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          filename: newFilename,
+          content: "",
+          owner: decodedUser?.id,
+          roomId,
+        }),
+      });
 
       const data = await response.json();
       if (!response.ok) {
@@ -231,12 +222,9 @@ export const Sidebar = ({
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/rooms/file/delete/${fileId}`,
-        {
-          method: "DELETE",
-        },
-      );
+      const response = await fetch(apiUrl(`/api/rooms/file/delete/${fileId}`), {
+        method: "DELETE",
+      });
 
       const data = await response.json();
       if (!response.ok) {

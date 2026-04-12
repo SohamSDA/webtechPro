@@ -4,6 +4,7 @@ import { validateEmail } from "../../utils/helper.js";
 import { toast } from "react-toastify";
 import { ArrowRight, ShieldCheck, Sparkles, Users } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { apiUrl } from "@/lib/api";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -27,7 +28,7 @@ export const Login = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:3000/auth/login", {
+      const response = await fetch(apiUrl("/auth/login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

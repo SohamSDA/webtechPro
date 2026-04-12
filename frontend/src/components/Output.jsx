@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiUrl } from "@/lib/api";
 
 export const OutputConsole = ({ code, language }) => {
   const [output, setOutput] = useState("");
@@ -7,7 +8,7 @@ export const OutputConsole = ({ code, language }) => {
   const runCode = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/code/execute", {
+      const response = await fetch(apiUrl("/code/execute"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code, language }),

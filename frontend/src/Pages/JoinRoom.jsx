@@ -22,6 +22,7 @@ import {
   Users,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { apiUrl } from "@/lib/api";
 
 export const JoinRoom = () => {
   const [user, setUser] = useState(null);
@@ -57,7 +58,7 @@ export const JoinRoom = () => {
     const newRoom = { roomId, roomName, ownerId: user.id, collaborators: [] };
 
     try {
-      const response = await fetch("http://localhost:3000/api/rooms", {
+      const response = await fetch(apiUrl("/api/rooms"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newRoom),
@@ -88,15 +89,12 @@ export const JoinRoom = () => {
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/rooms/join/${enteredRoomId}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: user.id }),
-          credentials: "include",
-        },
-      );
+      const response = await fetch(apiUrl(`/api/rooms/join/${enteredRoomId}`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id }),
+        credentials: "include",
+      });
 
       const data = await response.json();
       if (response.ok) {
@@ -115,7 +113,7 @@ export const JoinRoom = () => {
     const fetchJoinedRooms = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/rooms/getrooms/${user?.id}`,
+          apiUrl(`/api/rooms/getrooms/${user?.id}`),
           {
             credentials: "include",
           },

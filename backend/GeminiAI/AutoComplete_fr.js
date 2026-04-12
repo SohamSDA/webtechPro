@@ -14,10 +14,10 @@ editor.addEventListener("input", () => {
     suggestionBox.textContent = "Thinking... 💭";
 
     try {
-      const res = await fetch("http://localhost:3000/complete", {
+      const res = await fetch("/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code })
+        body: JSON.stringify({ code }),
       });
       const data = await res.json();
 
